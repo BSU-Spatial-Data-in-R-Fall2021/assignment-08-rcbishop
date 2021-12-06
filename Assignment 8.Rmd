@@ -56,7 +56,7 @@ library(tmap)
 library(viridis)
 ```
   
-For ease of use (and in the interest of time), I am going to follow along with the example you have provided and work with the data from Assignment 7.   
+For ease of use and learning (and in the interest of time), I am going to follow along with the example you have provided and work with the data from Assignment 7.   
 
 ```{r}
 files<-list.files("/opt/data/session16/", full.names = TRUE)
@@ -123,7 +123,38 @@ thewest<- tigris::states(cb=TRUE) %>%
   filter(STUSPS %in% c("ID", "MT", "WY", "UT", "CO", "NV", "AZ", "NM"))
 plot(thewest$geometry)
 ```
+  
+Okay, time to get everything into the same projection. From M. Williamson: "Because the mammal richness data is the largest, we'll project everything to that and then crop."
 
+```{r}  
+#checking shape files 
+st_crs(pas)$proj4string
+st_crs(thewest)$proj4string
+#checking rasters
+crs(mammal.rich, proj=TRUE)
+crs(landval, proj= TRUE)
+```
+  
+We can see that the PAs shape file and the landval raster are in the same projection, but "thewest" shapefile and the mammal.rich raster do not match the others. BUT... we need to project everything to the mammal.rich raster and then crop it down. 
+
+```{r}
+#TURNING shape files into Spat Vectors so we can work with them alongside raster files 
+pa.vect<-as(pas, "SpatVector")
+thewest.vect<-as(thewest, "SpatVector")
+```
+Now time to project to the mammal.rich raster 
+
+```{r}
+pa.vect.proj<-project(pa.vect, mammal.rich)
+thewest.vect.proj<-project(thewest.vect, mammal.rich)
+landval.proj<-project(landval, mammal.rich)
+```
+  
+And, finally, crop everything down to "the west"- or western United States of interest 
+```{r}
+mammal.rich.crop<-crop(mammal.rich, thewest.vect.proj)
+landval.crop<-crop(landval.proj, thewest.vect.proj)
+```
 
 # Task 3: Build a map with Tmap
 Practice making a quick map with tmap. 
