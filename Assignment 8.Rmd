@@ -1,0 +1,55 @@
+---
+title: "Assignment 8"
+author: "Rebecca Bishop"
+date: "12/5/2021"
+output: html_document
+---
+
+## Your assignment
+
+The goals for this assignment are to:
+
+- practice making maps with the various packages
+- think about composition and the grammar of graphics
+- critique various maps
+
+_By the end of the assignment_ you should have several static maps displaying the datasets we've used in the last few weeks.
+
+# Task 1: Show me your ugly maps!!
+Find 2 examples of maps that you think are 'bad'. 
+
+*Bad* maps are "maps where the graphic is unclear, confusing, or deceiving." 
+
+**MAP 1:** 
+Version 1: https://i.redd.it/q9jwbwejrvr71.png
+Version 2 (page 12): https://www.bc.edu/content/dam/files/centers/jesinst/pdf/Grim-globalReligion-full.pdf 
+Apparently there is an entire reddit thread dedicated to bad maps. The vast majority of the posts are maps where entire countries are missing or placed in the wrong location. I did visit this thread for inspiration and found the linked gem above. I tried to find the original through the Pew Research Center, and had some trouble, but was able to find the report from Pew on Boston College's site (Version 2). Strangely enough, the 2nd version in the report(published in 2012) is even worse than the 1st version (but are representing the same data). There is no key! 
+
+While this map was originally posted because Tajikistan and Kyrgyzstan we eliminated from the map (and apart of China), I found this to be a "bad" map for other reasons. First and foremost, it's visually confusing. I had to look at it at least a couple of times before I could really understand the data that is trying to be communicated. I think one of the most off-putting things about this map is the amount of red that is used. Obviously, Christianity is a predominate religion and that is why we are seeing red... but, I think a different color palette could have been used. They have chosen to use primary colors with red and green at the top of the pack. What about all the color blind people out there?? Also, the use darker and lighter hues (where a darker color represents greater prevalence of a religion) is so strange here, especially with a thresh hold of 90%. The graph is titled "The largest religious groups worldwide." The greater than 90% statistic is significant - we can understand what that means. But what does <90% tell us? Virtually nothing. Countries with say 5% Christian population and countries with 88% Christian population are represented here equally. In the <90% countries, are there other dominate religions at play (other than the one listed as less than 90%)? If a country is less than say 90% Christian, where is the cutoff in percentage before you say that this country is less than 90% Jewish? I think it detracts from the point of the graphic. Also, they have Isreal magnified. Why? Because it's so small? There are plenty of other really small countries on the map that aren't highlighted. What is the purpose of the magnification? 
+
+To better this map, I would change the color story to softer hues and eliminate the use of red and green (being mindful of color blindness). I would also change the use of the <90% statistic, by eliminating it all together - or- being more concise about why a country is still being assigned "Christian" or "Muslim" (when below 90%) by giving a more precise range- such as 50-90% of the population is Christian. I would also either 1) eliminate the magnification -or- 2) give a reason for it -or- 3) make the map bigger so that we can see even smaller countries. Last but not least, I'd make sure Tajikistan and Kyrgyzstan were on the map. 
+
+**MAP 2:**
+
+
+# Task 2: Load your libraries and build a dataframe
+You can choose whichever datasets you'd like from the past several months as the subject for your mapping. You'll need to use at least one tabular join, one spatial join, and one extraction to create the dataframe. Load the packages, the data, and make sure everything is projected here. Give me a sense for what you are hoping to map.
+
+
+# Task 3: Build a map with Tmap
+Practice making a quick map with tmap. 
+
+
+# Task 4: Build a choropleth with ggplot
+Your map should have a basemap, should rely on more than one aesthetic (color, transparency, etc), and combine multiple layers.
+
+# Task 5: Build 2 cartograms
+Follow the examples to build cartograms that display your region of interest based on variables other than area.
+
+_Question 3:_ Reflect on the different maps you've made, what do the different visualizations tell you about the data you plotted?
+
+_Question 4:_ How might you improve the maps you've made?
+
+_Question 5:_ Is a map the best way to evaluate the data you worked with? Why or Why not?
+
+
