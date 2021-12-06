@@ -39,6 +39,90 @@ I would instead put the names of the migration stations directly on the map (as 
 
 # Task 2: Load your libraries and build a dataframe
 You can choose whichever datasets you'd like from the past several months as the subject for your mapping. You'll need to use at least one tabular join, one spatial join, and one extraction to create the dataframe. Load the packages, the data, and make sure everything is projected here. Give me a sense for what you are hoping to map.
+  
+```{r}
+library(tidyverse)
+library(pander)
+library(sf)
+library(terra)
+library(units)
+library(ggmap)
+#ggmap "allows easy downloads of basemaps from Google (requires a key) and Stamen for use in mapping (and within ggplot2)."
+library(cartogram)
+#"Cartogram package facilitates thematic changes on the geometry based on other attributes (e.g. population)"
+library(patchwork)
+#"patchwork package allows easy composition of multi-figure plots"
+library(tmap)
+library(viridis)
+```
+  
+For ease of use (and in the interest of time), I am going to follow along with the example you have provided and work with the data from Assignment 7.   
+
+```{r}
+files<-list.files("/opt/data/session16/", full.names = TRUE)
+files
+#1) Loading regional protected area shapefiles  
+pas.proc<-st_read(files[8])
+files2<-list.files("/opt/data/session04/", pattern= "*.shp", full.names = TRUE)
+files2
+pas.desig<-st_read(files2[2])
+#2) Loading rasters  
+files
+mammal.rich<-rast(files[1])
+landval<-rast(files[5])
+#catalyzing mammal rich rast to get "continuous data "value" data
+mammal.rich<-catalyze(mammal.rich)
+plot(mammal.rich)
+mammal.rich<-mammal.rich[[2]]
+plot(mammal.rich)
+```
+  
+Checking geometries and CRS on shape files 
+```{r}
+all(st_is_valid(pas.proc))
+#FALSE. Need to make valid 
+pas.proc.valid<-st_make_valid(pas.proc)
+all(st_is_valid(pas.proc.valid))
+#True. Fixed
+all(st_is_valid(pas.desig))
+#FALSE
+pas.desig.valid<-st_make_valid(pas.desig)
+all(st_is_valid(pas.desig.valid))
+#True. Fixed 
+st_crs(pas.desig.valid) == st_crs(pas.proc.valid)
+#TRUE
+st_crs(pas.desig.valid)
+#Contiguous Albers 
+st_crs(pas.proc.valid)
+#Contiguous Albers 
+```
+Next, we need to combine the PAs shape files into one, but we have a disconnect with the naming of columns. We will need to rename columns 
+```{r}
+colnames(pas.desig.valid)
+colnames(pas.proc.valid)
+colnames(pas.proc.valid)[c(1,6,8,10,12,22,25)]<-colnames(pas.desig.valid)
+colnames(pas.proc.valid)
+colnames(pas.desig.valid)
+```
+  
+Okay, ready to combine protected area shape files into one pa file 
+```{r}
+gap.sts<-c("1", "2", "3")
+pas<-pas.proc.valid %>%
+  select(., colnames(pas.desig.valid)) %>%
+  bind_rows(pas.desig.valid, pas.proc.valid) %>%
+  #selecting the columns match and then combine
+  filter(., State_Nm %in% c("ID", "MT", "WY", "UT", "CO", "NV", "AZ", "NM") & GAP_Sts %in% gap.sts) %>% st_buffer(., 1000)
+#Buffering here to deal with some of the linear features along rivers
+```
+  
+Now, we need to make a shapefile of our states of interest. In this case, "the west." We can do this will package tigris 
+```{r}
+?tigris
+thewest<- tigris::states(cb=TRUE) %>%
+  filter(STUSPS %in% c("ID", "MT", "WY", "UT", "CO", "NV", "AZ", "NM"))
+plot(thewest$geometry)
+```
 
 
 # Task 3: Build a map with Tmap
