@@ -235,6 +235,7 @@ Also...
   
 I'll do mean income since the example does population. 
 
+**NOTE: IT DOES MATTER IN WHICH ORDER YOU STACK THE LAYERS! So do the raster first and then stack everything else on top!** 
 ```{r}
 library(tmap)
 ?tmap
@@ -249,15 +250,70 @@ tm_shape(thewest)+tm_borders("black", lwd = 0.75)
 
 
 # Task 4: Build a choropleth with ggplot
-Your map should have a basemap, should rely on more than one aesthetic (color, transparency, etc), and combine multiple layers.
+Your map should have a basemap, should rely on more than one aesthetic (color, transparency, etc), and combine multiple layers.  
+ 
+From M. Williamson's notes: 
+"The tmap approach is relatively straigtforward and may achieve all you ever hope for in map production. That said, ggplot2 is generally the “industry standard” for plotting in R. That doesn’t mean it’s the best, or the easiest; but it is under constant development to accomodate more and more different kinds of data."
+
+*"mapping = aes() is the call that specifies the mapping between the data and the aesthetics"
+*"geom_ call specifies the geometric element. In this case "geom_sf" tells ggplot to map in mapping=aes(x=longitude, y=latitude)"  
+
+```{r}
+ggplot(summary.df) +
+  geom_sf(mapping = aes(fill=meaninc))+
+  geom_sf(data = thewest, fill=NA, color= "black")
+```
+"Now let’s add a little fanciness by adding a basemap from ggmap (check out the ?ggmap and ?get_map for details)"
+
+```{r}
+bg<-ggmap::get_map(as.vector(st_bbox(thewest)))
+ggmap(bg) + 
+  geom_sf(data=summary.df, mapping= aes(fill=meaninc), inherit.aes = FALSE)+
+  geom_sf(data= thewest, fill=NA, color="black", inherit.aes= FALSE)+
+  coord_sf(crs = st_crs(4326))  
+```
+**NOTE:** From M. Williamson: "We are still building the map layer-by-layer, but in this case had to use ggmap to get R to recognize that we wanted to use the downloaded file as the base for the plot. We also have to use inherit.aes=FALSE to allow each additional geom to have it’s own set of aesthetics. Finally, we use **coord_sf() to add a new coordinate system to the map because ggmap downloads everything in WGS84."**
+
+**I am having the same issue with this that Jessica and Kirsten had where the base map dotted lines are not lining up with our state boundary lines.**   
+  
+More notes from M. Williamson: 
+"Now that we have things starting to look nice, let’s see if we can add a few more aesthetics and introduce a scale." 
+
+ggmap(bg) +
+  geom_sf(data = summary.df, mapping = aes(fill = Value,                                          alpha = (idval - max(idval, na.rm=TRUE))/(max(idval, na.rm=TRUE)-min(idval, na.rm = TRUE))), inherit.aes = FALSE) +
+  geom_sf(data=id, fill=NA,color="black", inherit.aes = FALSE) +
+  scale_fill_viridis(option="magma")+
+  coord_sf(crs = st_crs(4326))  
+  
+"Here we’ve added an additional aesthetic mapping for alpha which sets the transparency and then used scale_fill_viridis_ to map the species richness value to the viridis color palette. We’ve then ‘softened’ that color based on the cost of land in that area. You can find additional palettes and options using the ?scale_fill_ helpfiles."  
+
+(I couldn't get this to work with my code, even with subbing out variables.It is as if we are missing a variable in our summary table.) 
 
 # Task 5: Build 2 cartograms
-Follow the examples to build cartograms that display your region of interest based on variables other than area.
+Follow the examples to build cartograms that display your region of interest based on variables other than area.  
 
-_Question 3:_ Reflect on the different maps you've made, what do the different visualizations tell you about the data you plotted?
+"Let's look at two versions of Idaho using the cartogram package: population vs. income." 
+  
+```{r}
+west_pop<-cartogram_cont(west.census, "pop", itermax = 5)
+west_income<-cartogram_cont(west.census, "medianincome", itermax = 5)
+#First, population 
+tm_shape(west_pop)+tm_polygons("pop", style= "jenks")+ tm_layout(frame=FALSE, legend.position = c("left", "center"))
+  
+```
 
-_Question 4:_ How might you improve the maps you've made?
+```{r}
+#Now income 
+tm_shape(west_income) +tm_polygons("medianincome", style= "jenks")+
+  tm_layout(frame=FALSE, legend.position = c("right", "bottom"))
+```
+  
+"Kind of interesting to see how the ‘center of gravity’ in Idaho shifts when we think about population and income. There’s lots of additional cartogram options that you can explore."  
+  
+**Question 3:** Reflect on the different maps you've made, what do the different visualizations tell you about the data you plotted?
 
-_Question 5:_ Is a map the best way to evaluate the data you worked with? Why or Why not?
+**Question 4:** How might you improve the maps you've made?
+  
+**Question 5:**  Is a map the best way to evaluate the data you worked with? Why or Why not?
 
 
