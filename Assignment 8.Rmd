@@ -112,7 +112,7 @@ pas<-pas.proc.valid %>%
   select(., colnames(pas.desig.valid)) %>%
   bind_rows(pas.desig.valid, pas.proc.valid) %>%
   #selecting the columns match and then combine
-  filter(., State_Nm %in% c("ID", "MT", "WY", "UT", "CO", "NV", "AZ", "NM") & GAP_Sts %in% gap.sts) %>% st_buffer(., 1000)
+  filter(., State_Nm %in% c("ID", "MT", "WY", "UT", "CO", "AZ", "NM") & GAP_Sts %in% gap.sts) %>% st_buffer(., 1000)
 #Buffering here to deal with some of the linear features along rivers
 ```
   
@@ -120,7 +120,7 @@ Now, we need to make a shapefile of our states of interest. In this case, "the w
 ```{r}
 ?tigris
 thewest<- tigris::states(cb=TRUE) %>%
-  filter(STUSPS %in% c("ID", "MT", "WY", "UT", "CO", "NV", "AZ", "NM"))
+  filter(STUSPS %in% c("ID", "MT", "WY", "UT", "CO", "AZ", "NM"))
 plot(thewest$geometry)
 ```
   
@@ -173,7 +173,7 @@ census_api_key("5b7ad661cf6e4de1e552c4b0707dedfe686fbc72")
 west.census<-get_acs(geography= "county", 
                      variables = c(medianincome = "B19013_001",
                             pop = "B01003_001"), 
-                     state = c("ID", "MT", "WY", "UT", "CO", "NV", "AZ", "NM"), 
+                     state = c("ID", "MT", "WY", "UT", "CO","AZ", "NM"), 
                      year = 2018, 
                      geometry = TRUE) %>% 
                     st_transform(.,crs(pa.vect.proj)) %>%
@@ -227,10 +227,25 @@ Practice making a quick map with tmap.
 From M. Williamson's example:   
 "Up until now, we’ve been using the base::plot function to generate rapid visualizations of our data. That’s fine, but it takes a fair amount of work to get those graphics into something resembling a publication-quality map. The tmap package is a versatile package designed specifically for making thematic maps. It generally builds on the grammar of graphics logic and follows most of the ggplot2 conventions. It’s not quite as flexible as ggplot2 and doesn’t allow easy integration for different types of non-spatial figures (but see patchwork for ways to address this); however, it has a lot of functionality for both static and interactive mapping and deals with raster datasets in a way that is more intuitive than ggplot2. I’ll introduce a few of the features here, but I would encourage you to take a look at Manuel Gimond’s set of notes and the tmap intro pages to get broader exposure to the capabilities of tmap. We’ll revisit some of these next week, but let’s get started with some simple examples." 
 
+Also... 
+*tm_shape: "specifies which dataset we are talking about"
+*tm_polygons: "allows you to the specify a number of additional gg elements including aesthetics. For example tm_polygons(col = "meanpop", border.col= "white)+ tm_legend(outside=TRUE)"
+
+"There are a variety of tm_* functions."
+  
+I'll do mean income since the example does population. 
+
 ```{r}
-
+library(tmap)
+?tmap
+current.mode <- tmap_mode("plot")
+tm_shape(landval.crop)+tm_raster(palette = viridis(n=100), n=100, legend.show = FALSE, legend.hist = TRUE, legend.hist.title = "Land Values")+
+tm_shape(summary.df) +
+  tm_polygons(col= "meaninc", border.col= "black", title="Mean Income")+
+  tm_legend(outside = TRUE) +
+tm_shape(thewest)+tm_borders("black", lwd = 0.75)
+#I had to go back in the code and remove "NV" from the states since our original landval raster's extent does not go this far 
 ```
-
 
 
 # Task 4: Build a choropleth with ggplot
