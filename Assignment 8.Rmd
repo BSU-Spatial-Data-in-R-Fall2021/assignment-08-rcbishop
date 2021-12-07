@@ -56,7 +56,7 @@ library(tmap)
 library(viridis)
 ```
   
-For ease of use and learning (and in the interest of time), I am going to follow along with the example you have provided and work with the data from Assignment 7.   
+For ease of use and learning (and in the interest of time), I am going to follow along with the example you have provided and work with the data from Assignment 7. ***BACK FROM THE FUTURE(near the end of the assignment)***: I can confidently say that working with this data again today has really solidified some of these concepts for me (and I think I am finally getting the hang of it!) 
 
 ```{r}
 files<-list.files("/opt/data/session16/", full.names = TRUE)
@@ -152,12 +152,85 @@ landval.proj<-project(landval, mammal.rich)
   
 And, finally, crop everything down to "the west"- or western United States of interest 
 ```{r}
+#pa.vect.proj should already match "thewest"
 mammal.rich.crop<-crop(mammal.rich, thewest.vect.proj)
 landval.crop<-crop(landval.proj, thewest.vect.proj)
 ```
+Rechecking CRS on everything(this step is really for my own peace of mind)
+```{r}
+crs(mammal.rich.crop, proj=TRUE)
+crs(landval.crop, proj= TRUE)
+crs(pa.vect.proj, proj=TRUE)
+crs(thewest.vect.proj, proj=TRUE)
+#ALL MATCH 
+```
+  
+Next step: "Adding 'population' to our census data by making a change to our tidycensus call." (Before we had just pulled median income). "SPREAD will be used here to move the data into WIDE format."
+
+```{r}
+library(tidycensus)
+census_api_key("5b7ad661cf6e4de1e552c4b0707dedfe686fbc72")
+west.census<-get_acs(geography= "county", 
+                     variables = c(medianincome = "B19013_001",
+                            pop = "B01003_001"), 
+                     state = c("ID", "MT", "WY", "UT", "CO", "NV", "AZ", "NM"), 
+                     year = 2018, 
+                     geometry = TRUE) %>% 
+                    st_transform(.,crs(pa.vect.proj)) %>%
+                    select(-moe) %>%
+                    spread(variable, estimate)
+```
+  
+Next, "we'll do the necessary extractions and join everything together into a single dataframe that we can use for plotting."  
+First, join the census data to our pa dataset. Then we will filter and summarise some of the data.  
+```{r}
+#have to convert pas back into an sf object (from SpatVector) to join with the census data 
+pa.summary<- st_join(st_as_sf(pa.vect.proj), west.census, join = st_overlaps)
+class(pa.summary)
+head(pa.summary)
+pa.summary.filt<- pa.summary %>%
+  group_by(Unit_Nm) %>% 
+  summarize(., meaninc = mean(medianincome, na.rm= TRUE),
+            meanpop = mean(pop, na.rm= TRUE))
+#double checking to see if I have the right number of rows. "Unit_Nm" refers to the name of each protected area  
+nrow(pa.summary.filt) == length((unique(pas$Unit_Nm)))
+#True 
+```
+  
+Onto the extractions
+```{r}
+#again, working with the PA SPAT VECTOR! (because we are working with analysis in raster data)
+pas$Unit_Nm
+#REMEMBER: RASTERIZE "Transfers values associate with 'vector' type spatial data (points, lines, polygons) to the spatially overlapping raster cells." x is the SPAT VECT and y is the raster object. Again, think of it as laying out a stencil for your rasters. The stencil is your shape file(really SpatVector) or lines, points, etc/ 
+#rasterize
+pa.zones<-terra::rasterize(pa.vect.proj, mammal.rich.crop, field= "Unit_Nm")
+#extracting using the "stencil" 
+mammal.zones<-terra::zonal(mammal.rich.crop, pa.zones, fun= "mean", na.rm=TRUE)
+landval.zones<-terra::zonal(landval.crop, pa.zones, fun = mean, na.rm=TRUE)
+#"Note that there is one few zone than we have in our PA dataset. This is because we have an overlapping jurisdicition; we'll ingnore that now but it's a common problement with using the PADUS"  
+```
+  
+**COMBINING EVERYTHING INTO ONE LARGE DATAFRAME!
+(I did this the hard way on MINI PROJECT 1!)
+```{r}
+class(pa.summary.filt) #sf
+class(mammal.zones) #df
+class(landval.zones) #df
+summary.df<- pa.summary.filt %>% 
+  left_join(., mammal.zones) %>%
+              left_join(., landval.zones)
+```
 
 # Task 3: Build a map with Tmap
-Practice making a quick map with tmap. 
+Practice making a quick map with tmap.   
+  
+From M. Williamson's example:   
+"Up until now, we’ve been using the base::plot function to generate rapid visualizations of our data. That’s fine, but it takes a fair amount of work to get those graphics into something resembling a publication-quality map. The tmap package is a versatile package designed specifically for making thematic maps. It generally builds on the grammar of graphics logic and follows most of the ggplot2 conventions. It’s not quite as flexible as ggplot2 and doesn’t allow easy integration for different types of non-spatial figures (but see patchwork for ways to address this); however, it has a lot of functionality for both static and interactive mapping and deals with raster datasets in a way that is more intuitive than ggplot2. I’ll introduce a few of the features here, but I would encourage you to take a look at Manuel Gimond’s set of notes and the tmap intro pages to get broader exposure to the capabilities of tmap. We’ll revisit some of these next week, but let’s get started with some simple examples." 
+
+```{r}
+
+```
+
 
 
 # Task 4: Build a choropleth with ggplot
