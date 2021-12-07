@@ -310,10 +310,14 @@ tm_shape(west_income) +tm_polygons("medianincome", style= "jenks")+
   
 "Kind of interesting to see how the ‘center of gravity’ in Idaho shifts when we think about population and income. There’s lots of additional cartogram options that you can explore."  
   
-**Question 3:** Reflect on the different maps you've made, what do the different visualizations tell you about the data you plotted?
+**Question 3:** Reflect on the different maps you've made, what do the different visualizations tell you about the data you plotted?  
+TMAP: Generally speaking, I see a fairly decent trend that suggests landvalues are higher near protected areas. And for the most part, mean income is also higher near higher landvalue areas. 
+GGPLOT: Well, considering I couldn't get the second plot to work re: scale, I feel like this ggplot map doesn't tell us a whole lot. But, it's nice to look at and probably easy for people to understand. You can easily see which protected areas are associated with high median incomes and in which states this occurs. There appear to be very general statewide trends. 
+CARTOGRAM: I love these because I think they are really intuitive. We can see there are high population counts in the bulging areas of Arizona, Utah and Colorado. Two of the three areas (Utah and Colorado) also have high median incomes, while Arizona has a low median income, compartively. Funny enough, it looks like there is a huge bulge in southern Idaho for lower median incomes. 
 
-**Question 4:** How might you improve the maps you've made?
+**Question 4:** How might you improve the maps you've made?  
+For the tmap, I don't love that you can't see the raster value *within* the protected area, so I think if there were some way to "map" that value. I also don't like how there are very few geographical reference points in the map (i.e. no state names or other anchoring points). For someone that is not familiar with this geography, this could be confusing. For the ggplot map, the ggmap function is really neat and makes the map more aesthetically pleasing, but I feel like some of the information is lost (so almost the opposite problem of the tmap). However, I think if I had been able to work with the scale function, this would have made the map even more informative. For the cartogram, I would like to add some sort of outline for state boundaries so you have some sort of reference point. When you are covering such a large area(multiple points), you are kinda of just guessing about where you are on the map unless you know the area really well. A cartogram is probably more appropriate for a smaller extent (like one state) or for a question where boundaries are less important. 
   
-**Question 5:**  Is a map the best way to evaluate the data you worked with? Why or Why not?
-
+**Question 5:**  Is a map the best way to evaluate the data you worked with? Why or Why not? 
+For basic summary statistics- maybe. But for everything else- not really. You really can only make "generalizations" of the data you are seeing on the map. But none of this is definitive. I mean, realistically, a peer-reviewed scientific journal is not going to accept objective observations as a means for analysis. But perhaps I am not aware of different packages that can be used to effectively analyze these maps? That said, I do think being able to visualize data, and present this data, is imperative to  communicating your research effectively to the lay person and the rest of the scientific community. 
 
