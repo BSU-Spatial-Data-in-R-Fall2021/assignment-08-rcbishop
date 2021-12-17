@@ -278,16 +278,17 @@ ggmap(bg) +
   
 More notes from M. Williamson: 
 "Now that we have things starting to look nice, let’s see if we can add a few more aesthetics and introduce a scale." 
-
+```{r newmap}
 ggmap(bg) +
-  geom_sf(data = summary.df, mapping = aes(fill = Value,                                          alpha = (idval - max(idval, na.rm=TRUE))/(max(idval, na.rm=TRUE)-min(idval, na.rm = TRUE))), inherit.aes = FALSE) +
-  geom_sf(data=id, fill=NA,color="black", inherit.aes = FALSE) +
+  geom_sf(data = summary.df, mapping = aes(fill = Value,  alpha = (Regval - max(Regval, na.rm=TRUE))/(max(Regval, na.rm=TRUE)-min(Regval, na.rm = TRUE))), inherit.aes = FALSE) +
+  geom_sf(data=st_transform(thewest, crs =4326) , fill=NA,color="black", inherit.aes = FALSE) +
   scale_fill_viridis(option="magma")+
   coord_sf(crs = st_crs(4326))  
-  
+```  
 "Here we’ve added an additional aesthetic mapping for alpha which sets the transparency and then used scale_fill_viridis_ to map the species richness value to the viridis color palette. We’ve then ‘softened’ that color based on the cost of land in that area. You can find additional palettes and options using the ?scale_fill_ helpfiles."  
 
 (I couldn't get this to work with my code, even with subbing out variables.It is as if we are missing a variable in our summary table.) 
+__MW: I was able to get it to work? see above. RE: the lines being off, I think this is a function of somehting weird with stamen right now__
 
 # Task 5: Build 2 cartograms
 Follow the examples to build cartograms that display your region of interest based on variables other than area.  
@@ -321,3 +322,4 @@ For the tmap, I don't love that you can't see the raster value *within* the prot
 **Question 5:**  Is a map the best way to evaluate the data you worked with? Why or Why not? 
 For basic summary statistics- maybe. But for everything else- not really. You really can only make "generalizations" of the data you are seeing on the map. But none of this is definitive. I mean, realistically, a peer-reviewed scientific journal is not going to accept objective observations as a means for analysis. But perhaps I am not aware of different packages that can be used to effectively analyze these maps? That said, I do think being able to visualize data, and present this data, is imperative to  communicating your research effectively to the lay person and the rest of the scientific community. 
 
+__MW: remember maps are just depictions of spatial patterns. they are agnostic about causation or directionality. you might think of them as a sort of correlation analysis. We need actual statistics and design to be able to say anything about causation__
